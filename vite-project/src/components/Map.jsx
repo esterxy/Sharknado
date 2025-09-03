@@ -3,35 +3,71 @@ import mapboxgl from 'mapbox-gl';
 import './Map.css';
 import mockHotspots from '../data/mockHotspots.json';
 
-// TOKEN DO MAPBOX 
-mapboxgl.accessToken = 'pk.eyJ1IjoiZXN0ZXJzenkiLCJhIjoiY21mMXZxdWN3MTMweDJpcHpvdGhlMngyNSJ9.c0ejHv0aJlpe03h4acYJgw'; 
+mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
-export const Map = () => {
+export const Map = ({ viewport }) => {
   const mapContainer = useRef(null);
   const map = useRef(null);
-  
-  const lng = -120;
-  const lat = 35;
-  const zoom = 5.5;
 
   useEffect(() => {
-    if (map.current) return; 
+    if (map.current) return;
     
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
-      center: [lng, lat],
-      zoom: zoom,
+      style: 'mapbox://styles/mapbox/satellite-streets-v12',
+      center: [viewport.longitude, viewport.latitude],
+      zoom: viewport.zoom,
+      pitchWithRotate: false, 
+      dragRotate: false,      
     });
 
     map.current.on('load', () => {
-      mockHotspots.forEach(hotspot => {
-        new mapboxgl.Marker({ color: "#646cff" })
-          .setLngLat([hotspot.lng, hotspot.lat]) // Atenção: a ordem é [longitude, latitude]
-          .addTo(map.current);
+      
+      const geojsonData = {
+        type: 'FeatureCollection',
+        features: mockHotspots.map(hotspot => ({
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [hotspot.lng, hotspot.lat]
+          },
+          properties: {
+            id: hotspot.id,
+            especie: hotspot.especie
+          }
+        }))
+      };
+
+      
+      map.current.addSource('hotspots-source', {
+        type: 'geojson',
+        data: geojsonData
+      });
+
+      
+      map.current.addLayer({
+        id: 'hotspots-layer',
+        type: 'circle', 
+        source: 'hotspots-source',
+        paint: {
+          'circle-radius': 8,
+          'circle-color': '#646cff',
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#ffffff'
+        }
       });
     });
-  });
+  }, []);
+
+  useEffect(() => {
+    if (!map.current) return;
+
+    map.current.flyTo({
+      center: [viewport.longitude, viewport.latitude],
+      zoom: viewport.zoom,
+      essential: true,
+    });
+  }, [viewport]);
 
   return (
     <div ref={mapContainer} className="map-container" />
