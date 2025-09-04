@@ -1,0 +1,3 @@
+Projeto ApiGIBS já implementado com ambiente virtual venv, para caso de test da equipe,
+já vai com as bibliotecas e ferramentas instaladas no ambiente virtual venv
+para execução fastapi com request da API GIBS DA NASA!
