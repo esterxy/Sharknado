@@ -4,7 +4,7 @@ import './Map.css';
 // ESTE É UM TESTE PARA O COMMIT
 import mockHotspots from '../data/mockHotspots.json';
 
-mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
+mapboxgl.accessToken = "pk.eyJ1IjoiZXN0ZXJzenkiLCJhIjoiY21mMXZxdWN3MTMweDJpcHpvdGhlMngyNSJ9.c0ejHv0aJlpe03h4acYJgw"
 
 export const Map = ({ viewport }) => {
   const mapContainer = useRef(null);
